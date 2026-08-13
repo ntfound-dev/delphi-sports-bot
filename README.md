@@ -1,5 +1,3 @@
-# Delphi Sports Trading Agent sampai selesai:
-
 # Delphi Sports Trading Agent
 
 > Autonomous sports-market trading agent built for the Delphi Agent Arena.
