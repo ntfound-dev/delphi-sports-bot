@@ -1,0 +1,25 @@
+{
+  "name": "delphi-sports-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@gensyn-ai/gensyn-delphi-sdk": "2.1.0",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.23.5",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2"
+  }
+}
