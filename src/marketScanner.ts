@@ -35,6 +35,13 @@ export async function scanSportsMarkets(client: DelphiClient): Promise<ScannedMa
 
   const now = Date.now();
 
+  console.dir(all.map(m => ({
+    id: m.id,
+    metadata: m.metadata,
+    probs: m.spotImpliedProbabilities,
+  })), { depth: 6 });
+
+
   return all
     .map((m) => {
       const hoursToSettlement = m.settlesAt
