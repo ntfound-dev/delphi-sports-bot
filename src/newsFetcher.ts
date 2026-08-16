@@ -8,12 +8,23 @@ export async function fetchSportsNews(question: string): Promise<string | null> 
     return null;
   }
 
-  // Extract useful team/event terms from the market question.
-  const query = question
-    .replace(/[?"']/g, "")
-    .replace(/\bwill\b/gi, "")
-    .replace(/\b(on|in|the)\b/gi, " ")
-    .trim();
+  // Build a broad sports-news query from the market question.
+  // Avoid querying the entire prediction-market sentence.
+  const q = question.toLowerCase();
+
+  const teams = ["Arsenal", "Manchester City"].filter(t =>
+    q.includes(t.toLowerCase())
+  );
+
+  const event =
+    q.includes("community shield") ? '"Community Shield"' :
+    q.includes("fa cup") ? '"FA Cup"' :
+    q.includes("premier league") ? '"Premier League"' :
+    "";
+
+  const query = [...teams, event].filter(Boolean).join(" ").trim();
+
+  console.log(`[NEWS] query="${query}"`);
 
   const url = new URL(NEWS_ENDPOINT);
   url.searchParams.set("q", query);
