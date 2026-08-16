@@ -3,6 +3,7 @@ import { createDelphiClient } from "./delphiClient.js";
 import { scanSportsMarkets } from "./marketScanner.js";
 import { detectLongshotFadeSignals } from "./longshotFade.js";
 import { assessOutcomeWithNews } from "./newsSignal.js";
+import { fetchSportsNews } from "./newsFetcher.js";
 import { sizePosition } from "./riskManager.js";
 import { executeBuy, redeemAllSettled } from "./executor.js";
 
@@ -22,6 +23,24 @@ async function runOnce() {
   const priceSignals = detectLongshotFadeSignals(markets);
   log(`${priceSignals.length} price-based longshot/favorite signals detected.`);
 
+  for (const m of markets) {
+    log(
+      `[MARKET] ${m.metadata?.question ?? m.id} ` +
+      `outcomes=${JSON.stringify(m.metadata?.outcomes ?? [])} ` +
+      `probs=${JSON.stringify(m.spotImpliedProbabilities ?? [])} ` +
+      `settlesAt=${m.settlesAt ?? "unknown"} ` +
+      `hoursToSettlement=${m.hoursToSettlement?.toFixed(2) ?? "unknown"}`
+    );
+  }
+
+  for (const market of markets) {
+    log(
+      `[MARKET] ${market.metadata?.question ?? market.id} ` +
+      `outcomes=${JSON.stringify(market.metadata?.outcomes)} ` +
+      `probs=${JSON.stringify(market.spotImpliedProbabilities)}`
+    );
+  }
+
   const balance = await client.getErc20Balance();
   log(`Current token balance: ${balance.toString()}`);
 
@@ -37,8 +56,18 @@ async function runOnce() {
 
   for (const signal of priceSignals) {
     try {
-      // Combine the price-based prior with an LLM news/injury sanity check.
-      const assessment = await assessOutcomeWithNews(signal, null /* plug in news feed here */);
+      // Fetch fresh sports news before asking the LLM for a probability.
+      const question = signal.market.metadata?.question ?? "";
+      const newsContext = await fetchSportsNews(question);
+
+      log(
+        `  -> news context: ${
+          newsContext ? "available" : "none"
+        }`
+      );
+
+      // Combine the price-based prior with the live news context.
+      const assessment = await assessOutcomeWithNews(signal, newsContext);
       const finalEdge = assessment.modelProbability - signal.marketPrice;
 
       log(
